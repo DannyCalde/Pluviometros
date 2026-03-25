@@ -3,47 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Pluviómetros - EMPAGUA</title>
+    <title>Pluviómetros - EMPAGUA</title>
     <style>
-        /* Limpiamos el diseño para que ocupe toda la pantalla */
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            height: 100%; 
-            width: 100%;
-            overflow: hidden; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f4;
-        }
-
-        /* Contenedor del Formulario (La Máscara) */
-        #survey-container { 
-            position: absolute;
-            width: 100%; 
-            height: 100%; 
-            z-index: 99; 
-            background: white; 
-        }
-
-        /* Contenedor del Tablero (Oculto al inicio) */
-        #dashboard-container { 
-            width: 100%; 
-            height: 100%; 
-            display: none; 
-        }
-
-        iframe { 
-            border: none; 
-            width: 100%; 
-            height: 100%; 
-        }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #f4f4f4; }
+        #survey-container { position: absolute; width: 100%; height: 100%; z-index: 100; background: white; }
+        #dashboard-container { width: 100%; height: 100%; display: none; }
+        iframe { border: none; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
 
     <div id="survey-container">
         <iframe id="surveyFrame" 
-            src="https://survey123.arcgis.com/share/TU_ID_DE_SURVEY_AQUI?hide=navbar">
+            src="https://survey123.arcgis.com/share/6fa3227ded564a7d86e99190540042e9?portalUrl=https://gis.empagua.com/portal&hide=navbar">
         </iframe>
     </div>
 
@@ -52,16 +24,20 @@
     </div>
 
     <script>
-        // Escuchamos el evento cuando se envía el formulario
         window.addEventListener('message', function(e) {
-            // Survey123 envía este mensaje al padre cuando se completa el envío
-            if (e.data && (e.data === 'survey123:onFormSubmitted' || e.data.event === 'survey123:onFormSubmitted')) {
-                
-                console.log("Formulario enviado con éxito. Liberando tablero...");
-                
-                // Transición: Ocultamos el survey y mostramos el tablero
-                document.getElementById('survey-container').style.display = 'none';
-                document.getElementById('dashboard-container').style.display = 'block';
+            // Verificamos si el mensaje viene del Survey
+            if (e.data) {
+                try {
+                    var t = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+                    // Si el evento es que el formulario se envió con éxito
+                    if (t.event === 'survey123:onFormSubmitted') {
+                        console.log("¡Éxito! Liberando tablero...");
+                        document.getElementById('survey-container').style.display = 'none';
+                        document.getElementById('dashboard-container').style.display = 'block';
+                    }
+                } catch (error) {
+                    // Ignorar mensajes que no sean JSON (común en iframes)
+                }
             }
         });
     </script>
